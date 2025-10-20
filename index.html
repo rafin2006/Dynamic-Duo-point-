@@ -27,6 +27,12 @@
             font-size: 2.5rem;
             font-weight: 700;
         }
+        .negative-score {
+            color: #ef4444; /* red-500 */
+        }
+        .positive-score {
+             color: #818cf8; /* indigo-400 */
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -34,7 +40,7 @@
         <div class="bg-gray-800 shadow-2xl rounded-2xl p-6 md:p-10">
             <div class="text-center mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold text-white">DYNAMIC DUO POINT CALCULATOR</h1>
-                <p class="text-gray-400 mt-2">Enter your team's hours to calculate the final score.</p>
+                <p class="text-gray-400 mt-2">Enter your team's hours to calculate the final score precisely.</p>
             </div>
 
             <form id="calculatorForm" class="space-y-6">
@@ -50,7 +56,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label for="member1_hours" class="block text-sm font-medium text-gray-300 mb-2">Member 1: Hours Studied</label>
-                        <input type="number" step="0.01" id="member1_hours" name="member1_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 4.5" required>
+                        <input type="number" step="0.01" id="member1_hours" name="member1_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 4.5 or 4.33" required>
                     </div>
                     <div>
                         <label for="member2_hours" class="block text-sm font-medium text-gray-300 mb-2">Member 2: Hours Studied</label>
@@ -88,7 +94,7 @@
                     <div class="border-t-2 border-dashed border-gray-600 my-4"></div>
                     <div class="text-center">
                          <p class="text-gray-400 font-medium">Final Team Score</p>
-                         <p id="final-score" class="final-score text-indigo-400">0</p>
+                         <p id="final-score" class="final-score positive-score">0</p>
                     </div>
                  </div>
             </div>
@@ -96,82 +102,74 @@
     </div>
 
     <script>
-        const form = document.getElementById('calculatorForm');
-        const resultsDiv = document.getElementById('results');
-        const breakdownList = document.getElementById('breakdown-list');
-        const finalScoreEl = document.getElementById('final-score');
-
-        form.addEventListener('submit', function(e) {
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            // --- Get Inputs ---
             const session = document.getElementById('session').value;
             const hours1 = parseFloat(document.getElementById('member1_hours').value) || 0;
             const hours2 = parseFloat(document.getElementById('member2_hours').value) || 0;
             const isLate = document.getElementById('late_submission').checked;
 
-            // --- Rule Definitions ---
             let pointsPerHour = 1;
             let targetHours = 0;
+            const bonusPointsPerHour = 1;
 
             if (session === 'morning' || session === 'evening') {
                 pointsPerHour = 2;
                 targetHours = 4;
             }
 
-            // --- Initial Calculations ---
             let breakdownHTML = '';
             let penalties = [];
             
-            // Rule 1: Calculate only full hours
-            const fullHours1 = Math.floor(hours1);
-            const fullHours2 = Math.floor(hours2);
-
-            let points1 = 0;
-            let bonus1 = 0;
-            let points2 = 0;
-            let bonus2 = 0;
-            
-            // Rule: No points if target is not met
-            if(session !== 'noon'){
-                if (fullHours1 >= targetHours) {
-                    points1 = targetHours * pointsPerHour;
-                    bonus1 = (fullHours1 - targetHours);
+            // Function to calculate points for a single member based on the new rules
+            function calculateMemberPoints(hours) {
+                let basePoints = 0;
+                let bonusPoints = 0;
+                
+                if (session === 'noon') {
+                    basePoints = hours * pointsPerHour;
+                } else {
+                    if (hours >= targetHours) {
+                        basePoints = targetHours * pointsPerHour;
+                        bonusPoints = (hours - targetHours) * bonusPointsPerHour;
+                    } else {
+                        // **NEW RULE**: Get points for hours studied even if target is not met
+                        basePoints = hours * pointsPerHour;
+                    }
                 }
-                if (fullHours2 >= targetHours) {
-                    points2 = targetHours * pointsPerHour;
-                    bonus2 = (fullHours2 - targetHours);
-                }
-            } else { // Noon session has no target
-                points1 = fullHours1 * pointsPerHour;
-                points2 = fullHours2 * pointsPerHour;
+                return { total: basePoints + bonusPoints, bonus: bonusPoints };
             }
-            
-            let initialPoints = points1 + bonus1 + points2 + bonus2;
+
+            const member1Result = calculateMemberPoints(hours1);
+            const member2Result = calculateMemberPoints(hours2);
+
+            let initialPoints = member1Result.total + member2Result.total;
             let totalScore = initialPoints;
 
             // --- Display Earned Points ---
-            breakdownHTML += `<div class="result-item"><span>Member 1 (${fullHours1} hrs):</span><span class="font-semibold">${points1 + bonus1} pts</span></div>`;
-            if (bonus1 > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 1 Bonus:</span><span class="font-semibold bonus">+${bonus1}</span></div>`;
-            breakdownHTML += `<div class="result-item"><span>Member 2 (${fullHours2} hrs):</span><span class="font-semibold">${points2 + bonus2} pts</span></div>`;
-            if (bonus2 > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 2 Bonus:</span><span class="font-semibold bonus">+${bonus2}</span></div>`;
-            breakdownHTML += `<div class="result-item border-t border-gray-700 pt-2 mt-2"><strong>Initial Team Total:</strong><strong>${initialPoints} pts</strong></div>`;
+            breakdownHTML += `<div class="result-item"><span>Member 1 (${hours1.toFixed(2)} hrs):</span><span class="font-semibold">${member1Result.total.toFixed(2)} pts</span></div>`;
+            if (member1Result.bonus > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 1 Bonus:</span><span class="font-semibold bonus">+${member1Result.bonus.toFixed(2)}</span></div>`;
+            
+            breakdownHTML += `<div class="result-item"><span>Member 2 (${hours2.toFixed(2)} hrs):</span><span class="font-semibold">${member2Result.total.toFixed(2)} pts</span></div>`;
+            if (member2Result.bonus > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 2 Bonus:</span><span class="font-semibold bonus">+${member2Result.bonus.toFixed(2)}</span></div>`;
+            
+            breakdownHTML += `<div class="result-item border-t border-gray-700 pt-2 mt-2"><strong>Initial Team Total:</strong><strong>${initialPoints.toFixed(2)} pts</strong></div>`;
             
             // --- Penalty Calculations ---
-            
-            // Rule 2: Late submission penalty
             if (isLate) {
+                const totalBonus = member1Result.bonus + member2Result.bonus;
                 totalScore -= 2;
-                // Late submission cancels any bonus points
-                if(bonus1 > 0) totalScore -= bonus1;
-                if(bonus2 > 0) totalScore -= bonus2;
+                totalScore -= totalBonus; // Late submission cancels all bonus points
                 penalties.push({ text: "Late Submission", value: -2 });
+                if (totalBonus > 0) {
+                     penalties.push({ text: "Bonus Cancelled", value: `-${totalBonus.toFixed(2)}` });
+                }
             }
 
-            // Rule 3: Target failure penalty (only for Morning/Evening)
             if (session !== 'noon') {
-                const failed1 = fullHours1 < targetHours;
-                const failed2 = fullHours2 < targetHours;
+                const failed1 = hours1 < targetHours;
+                const failed2 = hours2 < targetHours;
 
                 if (failed1 && failed2) {
                     totalScore -= 4;
@@ -184,11 +182,10 @@
             }
             
             // --- Finalize and Display ---
-            if (totalScore < 0) {
-                totalScore = 0;
-            }
+            const resultsDiv = document.getElementById('results');
+            const breakdownList = document.getElementById('breakdown-list');
+            const finalScoreEl = document.getElementById('final-score');
 
-            // Add penalties to the breakdown
             if(penalties.length > 0){
                  breakdownHTML += `<div class="result-item pt-4"><strong class="penalty">Penalties:</strong><span></span></div>`;
                  penalties.forEach(p => {
@@ -197,7 +194,17 @@
             }
 
             breakdownList.innerHTML = breakdownHTML;
-            finalScoreEl.textContent = Math.round(totalScore);
+            const finalScore = totalScore.toFixed(2);
+            finalScoreEl.textContent = finalScore;
+
+            if (finalScore < 0) {
+                finalScoreEl.classList.remove('positive-score');
+                finalScoreEl.classList.add('negative-score');
+            } else {
+                finalScoreEl.classList.remove('negative-score');
+                finalScoreEl.classList.add('positive-score');
+            }
+
             resultsDiv.classList.remove('hidden');
         });
     </script>
