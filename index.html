@@ -12,30 +12,22 @@
         body {
             font-family: 'Inter', 'Hind Siliguri', sans-serif;
         }
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .penalty {
+        .result-item { display: flex; justify-content: space-between; align-items: center; }
+        .penalty { color: #ef4444; /* red-500 */ }
+        .bonus { color: #22c55e; /* green-500 */ }
+        .final-score { font-size: 2.5rem; font-weight: 700; }
+        .negative-score { color: #ef4444; /* red-500 */ }
+        .positive-score { color: #818cf8; /* indigo-400 */ }
+        .cap-note {
+            font-size: 0.8rem;
             color: #ef4444; /* red-500 */
-        }
-        .bonus {
-            color: #22c55e; /* green-500 */
-        }
-        .final-score {
-            font-size: 2.5rem;
-            font-weight: 700;
-        }
-        .negative-score {
-            color: #ef4444; /* red-500 */
-        }
-        .positive-score {
-             color: #818cf8; /* indigo-400 */
+            text-align: right;
+            padding-left: 1rem;
         }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+    <!-- Main Calculator Body -->
     <div class="w-full max-w-2xl mx-auto">
         <div class="bg-gray-800 shadow-2xl rounded-2xl p-6 md:p-10">
             <div class="text-center mb-8">
@@ -55,31 +47,43 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="member1_hours" class="block text-sm font-medium text-gray-300 mb-2">Member 1: Hours Studied</label>
-                        <input type="number" step="0.01" id="member1_hours" name="member1_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 4.5 or 4.33" required>
+                        <label for="member1_hours" class="block text-sm font-medium text-gray-300 mb-2">Member 1: Current Hours</label>
+                        <input type="number" step="0.01" id="member1_hours" name="member1_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" placeholder="e.g., 4.5" required>
                     </div>
                     <div>
-                        <label for="member2_hours" class="block text-sm font-medium text-gray-300 mb-2">Member 2: Hours Studied</label>
-                        <input type="number" step="0.01" id="member2_hours" name="member2_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" placeholder="e.g., 3.75" required>
+                        <label for="member2_hours" class="block text-sm font-medium text-gray-300 mb-2">Member 2: Current Hours</label>
+                        <input type="number" step="0.01" id="member2_hours" name="member2_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" placeholder="e.g., 3.75" required>
                     </div>
                 </div>
                 
-                <div class="border-t border-gray-700 pt-6">
-                     <p class="text-sm font-medium text-gray-300 mb-4">Late Submission (if applicable)</p>
-                     <div class="flex items-center space-x-8">
-                         <div class="relative flex items-start">
-                            <div class="flex items-center h-5">
-                                <input id="late_submission" name="late_submission" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 bg-gray-700 border-gray-600 rounded">
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="late_submission" class="font-medium text-gray-300">Did anyone on the team submit late?</label>
-                            </div>
-                        </div>
+                <div id="totalHoursContainer" class="hidden pt-6 border-t border-gray-700">
+                     <p class="text-sm font-medium text-gray-300 mb-4">Total time on Yeolpumta (আজকের মোট)</p>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                            <label for="member1_total_hours" class="block text-xs font-medium text-gray-400 mb-2">Member 1: Total Today</label>
+                            <input type="number" step="0.01" id="member1_total_hours" name="member1_total_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" placeholder="e.g., 12.5">
+                         </div>
+                         <div>
+                            <label for="member2_total_hours" class="block text-xs font-medium text-gray-400 mb-2">Member 2: Total Today</label>
+                            <input type="number" step="0.01" id="member2_total_hours" name="member2_total_hours" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg p-3" placeholder="e.g., 14">
+                         </div>
                      </div>
                 </div>
 
+                <div class="border-t border-gray-700 pt-6">
+                     <p class="text-sm font-medium text-gray-300 mb-4">Late Submission</p>
+                     <div class="relative flex items-start">
+                        <div class="flex items-center h-5">
+                            <input id="late_submission" name="late_submission" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 bg-gray-700 border-gray-600 rounded">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="late_submission" class="font-medium text-gray-300">Did anyone on the team submit late?</label>
+                        </div>
+                    </div>
+                </div>
+
                 <div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300 ease-in-out">
                         Calculate Score
                     </button>
                 </div>
@@ -88,9 +92,7 @@
             <div id="results" class="mt-10 hidden">
                  <h2 class="text-2xl font-bold text-center mb-6">Score Breakdown</h2>
                  <div class="bg-gray-800 rounded-lg p-6 border border-gray-700">
-                    <div id="breakdown-list" class="space-y-3 text-lg">
-                        <!-- Calculation details will be injected here -->
-                    </div>
+                    <div id="breakdown-list" class="space-y-3 text-lg"></div>
                     <div class="border-t-2 border-dashed border-gray-600 my-4"></div>
                     <div class="text-center">
                          <p class="text-gray-400 font-medium">Final Team Score</p>
@@ -102,17 +104,35 @@
     </div>
 
     <script>
-        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        const sessionSelect = document.getElementById('session');
+        const totalHoursContainer = document.getElementById('totalHoursContainer');
+        const form = document.getElementById('calculatorForm');
+        const resultsDiv = document.getElementById('results');
 
-            const session = document.getElementById('session').value;
+        sessionSelect.addEventListener('change', function() {
+            if (this.value === 'noon' || this.value === 'evening') {
+                totalHoursContainer.classList.remove('hidden');
+            } else {
+                totalHoursContainer.classList.add('hidden');
+            }
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            resultsDiv.classList.add('hidden'); // Hide previous results before new calculation
+
+            const session = sessionSelect.value;
             const hours1 = parseFloat(document.getElementById('member1_hours').value) || 0;
             const hours2 = parseFloat(document.getElementById('member2_hours').value) || 0;
+            const totalHours1_input = parseFloat(document.getElementById('member1_total_hours').value);
+            const totalHours2_input = parseFloat(document.getElementById('member2_total_hours').value);
             const isLate = document.getElementById('late_submission').checked;
 
-            let pointsPerHour = 1;
-            let targetHours = 0;
-            const bonusPointsPerHour = 1;
+            const totalHours1 = isNaN(totalHours1_input) ? hours1 : totalHours1_input;
+            const totalHours2 = isNaN(totalHours2_input) ? hours2 : totalHours2_input;
+            
+            const DAILY_CAP = 16;
+            let pointsPerHour = 1, targetHours = 0, bonusPointsPerHour = 1;
 
             if (session === 'morning' || session === 'evening') {
                 pointsPerHour = 2;
@@ -122,67 +142,66 @@
             let breakdownHTML = '';
             let penalties = [];
             
-            // Function to calculate points for a single member based on the new rules
-            function calculateMemberPoints(hours) {
-                let basePoints = 0;
-                let bonusPoints = 0;
-                
-                if (session === 'noon') {
-                    basePoints = hours * pointsPerHour;
-                } else {
+            const previousHours1 = (session === 'morning') ? 0 : Math.max(0, totalHours1 - hours1);
+            const previousHours2 = (session === 'morning') ? 0 : Math.max(0, totalHours2 - hours2);
+
+            let capMessage1 = '', capMessage2 = '';
+            const billableHours1 = Math.min(hours1, Math.max(0, DAILY_CAP - previousHours1));
+            if (billableHours1 < hours1) {
+                capMessage1 = `Note: Daily hours capped at 16. Points awarded for only ${billableHours1.toFixed(2)} of the ${hours1.toFixed(2)} hours.`;
+            }
+            const billableHours2 = Math.min(hours2, Math.max(0, DAILY_CAP - previousHours2));
+            if (billableHours2 < hours2) {
+                capMessage2 = `Note: Daily hours capped at 16. Points awarded for only ${billableHours2.toFixed(2)} of the ${hours2.toFixed(2)} hours.`;
+            }
+
+            const calculateMemberPoints = (hours) => {
+                let basePoints = 0, bonusPoints = 0;
+                if (session === 'noon') { basePoints = hours * pointsPerHour; } 
+                else {
                     if (hours >= targetHours) {
                         basePoints = targetHours * pointsPerHour;
                         bonusPoints = (hours - targetHours) * bonusPointsPerHour;
-                    } else {
-                        // **NEW RULE**: Get points for hours studied even if target is not met
-                        basePoints = hours * pointsPerHour;
-                    }
+                    } else { basePoints = hours * pointsPerHour; }
                 }
                 return { total: basePoints + bonusPoints, bonus: bonusPoints };
-            }
+            };
 
-            const member1Result = calculateMemberPoints(hours1);
-            const member2Result = calculateMemberPoints(hours2);
-
+            const member1Result = calculateMemberPoints(billableHours1);
+            const member2Result = calculateMemberPoints(billableHours2);
             let initialPoints = member1Result.total + member2Result.total;
             let totalScore = initialPoints;
 
-            // --- Display Earned Points ---
             breakdownHTML += `<div class="result-item"><span>Member 1 (${hours1.toFixed(2)} hrs):</span><span class="font-semibold">${member1Result.total.toFixed(2)} pts</span></div>`;
+            if (capMessage1) breakdownHTML += `<div class="cap-note">${capMessage1}</div>`;
             if (member1Result.bonus > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 1 Bonus:</span><span class="font-semibold bonus">+${member1Result.bonus.toFixed(2)}</span></div>`;
             
-            breakdownHTML += `<div class="result-item"><span>Member 2 (${hours2.toFixed(2)} hrs):</span><span class="font-semibold">${member2Result.total.toFixed(2)} pts</span></div>`;
+            breakdownHTML += `<div class="result-item mt-2"><span>Member 2 (${hours2.toFixed(2)} hrs):</span><span class="font-semibold">${member2Result.total.toFixed(2)} pts</span></div>`;
+            if (capMessage2) breakdownHTML += `<div class="cap-note">${capMessage2}</div>`;
             if (member2Result.bonus > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 2 Bonus:</span><span class="font-semibold bonus">+${member2Result.bonus.toFixed(2)}</span></div>`;
             
             breakdownHTML += `<div class="result-item border-t border-gray-700 pt-2 mt-2"><strong>Initial Team Total:</strong><strong>${initialPoints.toFixed(2)} pts</strong></div>`;
             
-            // --- Penalty Calculations ---
             if (isLate) {
                 const totalBonus = member1Result.bonus + member2Result.bonus;
                 totalScore -= 2;
-                totalScore -= totalBonus; // Late submission cancels all bonus points
+                totalScore -= totalBonus;
                 penalties.push({ text: "Late Submission", value: -2 });
-                if (totalBonus > 0) {
-                     penalties.push({ text: "Bonus Cancelled", value: `-${totalBonus.toFixed(2)}` });
-                }
+                if (totalBonus > 0) { penalties.push({ text: "Bonus Cancelled", value: `-${totalBonus.toFixed(2)}` }); }
             }
 
             if (session !== 'noon') {
                 const failed1 = hours1 < targetHours;
                 const failed2 = hours2 < targetHours;
-
                 if (failed1 && failed2) {
                     totalScore -= 4;
                     penalties.push({ text: "Both failed target", value: -4 });
                 } else if (failed1 || failed2) {
                     totalScore -= 2;
-                    const failedMember = failed1 ? "Member 1" : "Member 2";
-                    penalties.push({ text: `${failedMember} failed target`, value: -2 });
+                    penalties.push({ text: `One member failed target`, value: -2 });
                 }
             }
             
-            // --- Finalize and Display ---
-            const resultsDiv = document.getElementById('results');
             const breakdownList = document.getElementById('breakdown-list');
             const finalScoreEl = document.getElementById('final-score');
 
@@ -193,18 +212,30 @@
                  });
             }
 
+            // --- NEW: Add integrated health warning if cap is triggered ---
+            if (capMessage1 || capMessage2) {
+                const warningText = `
+                    <div class="mt-6 p-4 border-t-2 border-red-500 border-dashed">
+                        <h3 class="text-lg font-bold text-red-400 mb-3 text-center">⚠️ অতিরিক্ত পড়াশোনার কারণে জীবনে যেসব ক্ষতির সম্মুখীন হবেন:</h3>
+                        <ol class="text-left list-decimal list-inside space-y-2 text-red-300 text-sm">
+                            <li><strong>মানসিক দূরত্ব:</strong> অতিরিক্ত পড়াশোনায় মানুষ একা থাকতে অভ্যস্ত হয়ে যায়, ফলে বিবাহের পর মানসিক ঘনিষ্ঠতা বজায় রাখা কঠিন হয়।</li>
+                            <li><strong>দুর্বল যোগাযোগ:</strong> দীর্ঘদিন একা পড়াশোনা করতে করতে কথাবার্তা ও অনুভূতি প্রকাশের দক্ষতা নষ্ট হয়ে যায় — যা দাম্পত্য জীবনে খুব গুরুত্বপূর্ণ।</li>
+                            <li><strong>অসামঞ্জস্যপূর্ণ অগ্রাধিকার:</strong> যদি সাফল্যই জীবনের একমাত্র লক্ষ্য হয়ে যায়, তাহলে সঙ্গীর অধিকার ও মানসিক প্রয়োজনগুলো অবহেলিত থাকে।</li>
+                            <li><strong>অবহেলা ও একাকিত্ব:</strong> যখন স্বামী বা স্ত্রী সারাক্ষণ ব্যস্ত থাকে, তখন অপরজন নিজেকে অবহেলিত মনে করে; এতে সংসারের ভালোবাসা ও শান্তি নষ্ট হয়।</li>
+                            <li><strong>অবাস্তব প্রত্যাশা:</strong> অতিরিক্ত অধ্যয়ন অনেক সময় অতিরিক্ত নিখুঁত হওয়ার মানসিকতা তৈরি করে, যা পরে সঙ্গীর প্রতি অযৌক্তিক প্রত্যাশা ও বিরক্তির কারণ হয়।</li>
+                            <li><strong>মানসিক ক্লান্তি:</strong> দিনে ১৬ ঘণ্টা পড়াশোনা শরীর ও মনের শক্তি শুষে নেয় — ফলে দাম্পত্য জীবনে ভালোবাসা, ধৈর্য ও মনোযোগ দেওয়ার শক্তি কমে যায়।</li>
+                            <li><strong>দাম্পত্য জীবনে ভাঙন:</strong> এসব অভ্যাস যদি বিবাহের পরও চলতে থাকে, তবে ধীরে ধীরে সম্পর্কের উষ্ণতা হারিয়ে যায়, কলহ বাড়ে এবং শেষ পর্যন্ত সংসার ভেঙে যেতে পারে।</li>
+                        </ol>
+                    </div>
+                `;
+                breakdownHTML += warningText;
+            }
+
             breakdownList.innerHTML = breakdownHTML;
             const finalScore = totalScore.toFixed(2);
             finalScoreEl.textContent = finalScore;
-
-            if (finalScore < 0) {
-                finalScoreEl.classList.remove('positive-score');
-                finalScoreEl.classList.add('negative-score');
-            } else {
-                finalScoreEl.classList.remove('negative-score');
-                finalScoreEl.classList.add('positive-score');
-            }
-
+            finalScoreEl.className = 'final-score ' + (finalScore < 0 ? 'negative-score' : 'positive-score');
+            
             resultsDiv.classList.remove('hidden');
         });
     </script>
