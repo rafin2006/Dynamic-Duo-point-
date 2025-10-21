@@ -57,7 +57,7 @@
                 </div>
                 
                 <div id="totalHoursContainer" class="hidden pt-6 border-t border-gray-700">
-                     <p class="text-sm font-medium text-gray-300 mb-4">Total time on Yeolpumta (আজকে এখন পর্যন্ত মোট যতটুকু পড়েছো)</p>
+                     <p class="text-sm font-medium text-gray-300 mb-4">Total time on Yeolpumta (আজকে এখন পর্যন্ত যতটুকু মোট পড়েছো)</p>
                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                          <div>
                             <label for="member1_total_hours" class="block text-xs font-medium text-gray-400 mb-2">Member 1: Total Today</label>
@@ -77,7 +77,7 @@
                             <input id="late_submission" name="late_submission" type="checkbox" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 bg-gray-700 border-gray-600 rounded">
                         </div>
                         <div class="ml-3 text-sm">
-                            <label for="late_submission" class="font-medium text-gray-300">Submitting late?</label>
+                            <label for="late_submission" class="font-medium text-gray-300">Did anyone on the team submit late?</label>
                         </div>
                     </div>
                 </div>
@@ -174,6 +174,77 @@
             let totalScore = initialPoints;
 
             breakdownHTML += `<div class="result-item"><span>Member 1 (${hours1.toFixed(2)} hrs):</span><span class="font-semibold">${member1Result.total.toFixed(2)} pts</span></div>`;
+            if (capMessage1) breakdownHTML += `<div class="cap-note">${capMessage1}</div>`;
+            if (member1Result.bonus > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 1 Bonus:</span><span class="font-semibold bonus">+${member1Result.bonus.toFixed(2)}</span></div>`;
+            
+            breakdownHTML += `<div class="result-item mt-2"><span>Member 2 (${hours2.toFixed(2)} hrs):</span><span class="font-semibold">${member2Result.total.toFixed(2)} pts</span></div>`;
+            if (capMessage2) breakdownHTML += `<div class="cap-note">${capMessage2}</div>`;
+            if (member2Result.bonus > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 2 Bonus:</span><span class="font-semibold bonus">+${member2Result.bonus.toFixed(2)}</span></div>`;
+            
+            breakdownHTML += `<div class="result-item border-t border-gray-700 pt-2 mt-2"><strong>Initial Team Total:</strong><strong>${initialPoints.toFixed(2)} pts</strong></div>`;
+            
+            if (isLate) {
+                const totalBonus = member1Result.bonus + member2Result.bonus;
+                totalScore -= 2;
+                totalScore -= totalBonus;
+                penalties.push({ text: "Late Submission", value: -2 });
+                if (totalBonus > 0) { penalties.push({ text: "Bonus Cancelled", value: `-${totalBonus.toFixed(2)}` }); }
+            }
+
+            if (session !== 'noon') {
+                const failed1 = hours1 < targetHours;
+                const failed2 = hours2 < targetHours;
+                if (failed1 && failed2) {
+                    totalScore -= 4;
+                    penalties.push({ text: "Both failed target", value: -4 });
+                } else if (failed1 || failed2) {
+                    totalScore -= 2;
+                    penalties.push({ text: `One member failed target`, value: -2 });
+                }
+            }
+            
+            const breakdownList = document.getElementById('breakdown-list');
+            const finalScoreEl = document.getElementById('final-score');
+
+            if(penalties.length > 0){
+                 breakdownHTML += `<div class="result-item pt-4"><strong class="penalty">Penalties:</strong><span></span></div>`;
+                 penalties.forEach(p => {
+                     breakdownHTML += `<div class="result-item text-sm pl-4"><span class="penalty">${p.text}</span><span class="font-semibold penalty">${p.value}</span></div>`;
+                 });
+            }
+
+            // --- NEW: Add integrated health warning if warning trigger is met ---
+            if (totalHours1 >= WARNING_TRIGGER_HOURS || totalHours2 >= WARNING_TRIGGER_HOURS) {
+                const warningText = `
+                    <div class="mt-6 p-4 border-t-2 border-red-500 border-dashed">
+                        <h3 class="text-lg font-bold text-red-400 mb-3 text-center">⚠️ অতিরিক্ত পড়াশোনার কারণে জীবনে যেসব ক্ষতির সম্মুখীন হবেন:</h3>
+                        <ol class="text-left list-decimal list-inside space-y-2 text-red-300 text-sm">
+                            <li><strong>মানসিক দূরত্ব:</strong> অতিরিক্ত পড়াশোনায় মানুষ একা থাকতে অভ্যস্ত হয়ে যায়, ফলে বিবাহের পর মানসিক ঘনিষ্ঠতা বজায় রাখা কঠিন হয়।</li>
+                            <li><strong>দুর্বল যোগাযোগ:</strong> দীর্ঘদিন একা পড়াশোনা করতে করতে কথাবার্তা ও অনুভূতি প্রকাশের দক্ষতা নষ্ট হয়ে যায় — যা দাম্পত্য জীবনে খুব গুরুত্বপূর্ণ।</li>
+                            <li><strong>অসামঞ্জস্যপূর্ণ অগ্রাধিকার:</strong> যদি সাফল্যই জীবনের একমাত্র লক্ষ্য হয়ে যায়, তাহলে সঙ্গীর অধিকার ও মানসিক প্রয়োজনগুলো অবহেলিত থাকে।</li>
+                            <li><strong>অবহেলা ও একাকিত্ব:</strong> যখন স্বামী বা স্ত্রী সারাক্ষণ ব্যস্ত থাকে, তখন অপরজন নিজেকে অবহেলিত মনে করে; এতে সংসারের ভালোবাসা ও শান্তি নষ্ট হয়।</li>
+                            <li><strong>অবাস্তব প্রত্যাশা:</strong> অতিরিক্ত অধ্যয়ন অনেক সময় অতিরিক্ত নিখুঁত হওয়ার মানসিকতা তৈরি করে, যা পরে সঙ্গীর প্রতি অযৌক্তিক প্রত্যাশা ও বিরক্তির কারণ হয়।</li>
+                            <li><strong>মানসিক ক্লান্তি:</strong> দিনে ১৬ ঘণ্টা পড়াশোনা শরীর ও মনের শক্তি শুষে নেয় — ফলে দাম্পত্য জীবনে ভালোবাসা, ধৈর্য ও মনোযোগ দেওয়ার শক্তি কমে যায়।</li>
+                            <li><strong>দাম্পত্য জীবনে ভাঙন:</strong> এসব অভ্যাস যদি বিবাহের পরও চলতে থাকে, তবে ধীরে ধীরে সম্পর্কের উষ্ণতা হারিয়ে যায়, কলহ বাড়ে এবং শেষ পর্যন্ত সংসার ভেঙে যেতে পারে।</li>
+                        </ol>
+                    </div>
+                `;
+                breakdownHTML += warningText;
+            }
+
+            breakdownList.innerHTML = breakdownHTML;
+            const finalScore = totalScore.toFixed(2);
+            finalScoreEl.textContent = finalScore;
+            finalScoreEl.className = 'final-score ' + (finalScore < 0 ? 'negative-score' : 'positive-score');
+            
+            resultsDiv.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
+
+
+2)} hrs):</span><span class="font-semibold">${member1Result.total.toFixed(2)} pts</span></div>`;
             if (capMessage1) breakdownHTML += `<div class="cap-note">${capMessage1}</div>`;
             if (member1Result.bonus > 0) breakdownHTML += `<div class="result-item text-sm pl-4"><span>└ Member 1 Bonus:</span><span class="font-semibold bonus">+${member1Result.bonus.toFixed(2)}</span></div>`;
             
